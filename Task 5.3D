@@ -1,0 +1,78 @@
+# Task 5.3 D
+# Author - Amit Parmar
+# Date - 01 May 2021
+
+# Import the needed libraries
+from guizero import App, Text, TextBox, PushButton
+import RPi.GPIO as GPIO
+import time
+
+
+# Define the master list of the morse code values
+letters = {'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....', 
+      'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-',
+           'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--','Z': '--..',
+           '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+           '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----', ' ': ' '}
+
+# Set the pin for output to the LED
+PIN = 7
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(PIN, GPIO.OUT)
+
+# Function to blink the LED for text to Morse code on press of a button
+def led_control(time_sleep):
+    GPIO.output(PIN, GPIO.HIGH)
+    time.sleep(time_sleep)
+    GPIO.output(PIN, GPIO.LOW)
+    time.sleep(0.5)
+
+# Convert and print the text to morse code on the screen for user information
+def convert_to_morse():
+    # If the input value is more than 12 characters, return a message.
+    appMessage.value = inputText.value
+    if len(appMessage.value) > 12:
+        appMessage.value = "Cannot enter more than 12 characters"
+    else:
+        # Convert the text to morse code taking one character at a time.
+        appMessage.value = appMessage.value + ": "
+        word = inputText.value
+        word = word.upper()
+        for letter in word:
+            morseCodeLetter = letters[letter]
+            appMessage.value = appMessage.value + morseCodeLetter + " "
+            
+def led_blink():
+    # If the input value is more than 12 characters, return a message.
+    appMessage.value = inputText.value
+    if len(appMessage.value) > 12:
+        appMessage.value = "Cannot enter more than 12 characters"
+    else:
+        appMessage.value = appMessage.value + ": "
+        word = inputText.value
+        word = word.upper()
+        #print("Sending to LED")
+        # Convert the text to morse code taking one character at a time.
+        for letter in word:
+            morseCodeLetter = letters[letter]
+            # Keep LED on for 0.5 seconds for -, 0.2 seconds for a "."
+            # turn the LED off for 1 second for a space.
+            for codes in morseCodeLetter:
+                if codes == "-":
+                    led_control(0.5)
+                elif codes == ".":
+                    led_control(0.2)
+                elif codes == " ":
+                    time.sleep(1)
+
+# Create a window with a text box and two button
+app = App(title = "Text to Morse code - LED Blinker")
+appMessage = Text(app,text = "Please enter text", size = 20, font="Times New Roman",color="Red")
+inputText = TextBox(app, width = 20)
+convertToMorse = PushButton(app, command=convert_to_morse, text ="Get Morse Code", width = 20)
+ledBlink = PushButton(app, command=led_blink, text ="Send to LED", width = 20)
+app.display()
+
+# Clean up at the end
+GPIO.cleanup()
